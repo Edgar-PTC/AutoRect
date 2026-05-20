@@ -1,14 +1,15 @@
 import React, { createContext, useState, useEffect, useCallback } from "react"; //Importamos todas las mierdas de React, BIEN
 import { useNavigate } from "react-router"; //Importamos las cosas de React Router para que, si las credenciales son correctas, redirija.
-import { toast } from "sonner";
+import { toast } from "sonner"; //Esto no capto, pero ok
 
-const AuthContext = createContext(null);
-export { AuthContext };
+const AuthContext = createContext(null); //creas el objeto authContext
+export { AuthContext }; //lo exportas para que lo puedan usar otros componentes
 
 // Leer desde variables de entorno
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
 const STORAGE_KEY = import.meta.env.VITE_AUTH_STORAGE_KEY || "authToken";
 
+//Esto es para token, pero quizas no se use
 const decodeJwtPayload = (token) => {
   if (!token) return null;
   try {
@@ -21,11 +22,13 @@ const decodeJwtPayload = (token) => {
   }
 };
 
+//Este coso envuelve toda la app.js y permite manejar autenticaciones
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  //Lo mismo, para token, no sirven
   const getToken = useCallback(() => localStorage.getItem(STORAGE_KEY), []);
   const setToken = useCallback((token) => {
     localStorage.setItem(STORAGE_KEY, token);
@@ -35,6 +38,7 @@ export const AuthProvider = ({ children }) => {
     sessionStorage.removeItem(STORAGE_KEY);
   }, []);
 
+  //Funcion par logOut, esta es la simplificada, no toda la mierda de token
   const logout = useCallback(async () => {
     try {
         await fetch(`${API_URL}/logOut`, {
@@ -46,6 +50,7 @@ export const AuthProvider = ({ children }) => {
     }
   }, [navigate]);
 
+  //Funcion login
   const login = async (email, password) => {
     try {
       const response = await fetch(`${API_URL}/loginStudents`, {  // Ajusta la ruta según tu backend
