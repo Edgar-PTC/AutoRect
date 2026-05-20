@@ -1,39 +1,31 @@
 import { Link, useNavigate } from "react-router-dom"; // Importación de hooks y componentes necesarios para la funcionalidad de inicio de sesión y navegación
 import { useState } from "react"; // Importación de useState para manejar el estado local del formulario de inicio de sesión
 import LiquidEther from '../components/ReactBits/BGLiquidEther.jsx'
+import { useAuth } from "../hooks/useAuth.js"; // Importación de hook personalizado para manejar la autenticación del usuario
 
 function LogIn() {
   const navigate = useNavigate(); // Hook para manejar la navegación programática
-  const [ loading, setLoading ] = useState(false);
+  const { login, loading } = useAuth(); // Hook personalizado para manejar la autenticación del usuario
   const [email, setEmail] = useState(""); // Estado local para almacenar el correo electrónico ingresado por el usuario
   const [password, setPassword] = useState(""); // Estado local para almacenar la contraseña ingresada por el usuario
-  const TEST_EMAIL = "20230280@ricaldone.edu.sv";
-  const TEST_PASSWORD = "123456";
+  const [incorrect, setIncorrect] = useState(false); // Estado local para manejar la visualización de un mensaje de error en caso de credenciales incorrectas
+  const [message, setMessage] = useState(""); // Estado local para almacenar el mensaje de error a mostrar en caso de credenciales incorrectas
 
   // Función para manejar el envío del formulario de inicio de sesión
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setLoading(true)
-    await new Promise(resolve => setTimeout(resolve, 1000));
 
     if (!email.trim() || !password.trim()) { // Validación básica para asegurarse de que el correo electrónico y la contraseña no estén vacíos
-      console.log("credentials emptys");
-      setLoading(false);
-    }
-
-    let ok = false;
-    if(email == TEST_EMAIL && password == TEST_PASSWORD){
-      ok = true;
-    }
-    if (!ok) {
-      console.log("credentials incorrect");
-      setLoading(false);
+      setIncorrect(true); // Si alguno de los campos está vacío, se actualiza el estado para mostrar un mensaje de error
+      setMessage("Por favor, ingresa tu correo electrónico y contraseña."); // Se establece un mensaje de error específico para campos vacíos
       return;
     }
 
-    console.log("credentials correct");
-    setLoading(false);
-    navigate("/home"); // Navegación al dashboard si el inicio de sesión es exitoso
+    const ok = await login(email, password); // Llamada a la función de inicio de sesión del hook de autenticación
+    if(!ok){
+      setIncorrect(true); // Si las credenciales son incorrectas, se actualiza el estado para mostrar un mensaje de error
+      setMessage("Correo electrónico o contraseña incorrectos."); // Se establece un mensaje de error específico para credenciales incorrectas
+    }
   };
 
   return (
@@ -79,6 +71,7 @@ function LogIn() {
           </form>
         </div>
       </div>
+      <div className="fixed z-100 top-0 left-0"></div>
     </div>
   );
 }
